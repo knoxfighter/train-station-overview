@@ -1,1 +1,1 @@
-require("prototypes.item")
+require("prototypes.input")
