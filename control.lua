@@ -37,6 +37,8 @@ function find_train_stop(entity)
     return 0
 end
 
+local frames = {}
+
 script.on_event("open-train-stop-overview",
     function(e)
         -- get player
@@ -47,6 +49,7 @@ script.on_event("open-train-stop-overview",
 
         -- open frame (this is the gui shown to the player)
         player.opened = frame
+        frames[player.index] = frame
 
         local titleFlow = frame.add{type = "flow", direction = "horizontal"}
 
@@ -56,6 +59,11 @@ script.on_event("open-train-stop-overview",
         fillerFlow.style.horizontally_stretchable = true
 
         --TODO add search
+
+        if #global.train_stops < 1 then
+            frame.add{type = "label", caption = {"no-train-stops"}}
+            return
+        end
 
         -- Inner Frame with scrollbar and tableview
         local innerFrame = frame.add{type = "frame", style = "inside_deep_frame"}
@@ -68,10 +76,6 @@ script.on_event("open-train-stop-overview",
 
         local preview_size = 160
         local preview_size_half = preview_size / 2
-
-        if #global.train_stops < 1 then
-            tableView.add{type = "label", caption = {"no-train-stops"}}
-        end
 
         for _, train_stop in pairs(global.train_stops) do
             local position = train_stop.position
@@ -117,6 +121,16 @@ script.on_event("open-train-stop-overview",
             button_label.style.font  = "default-dialog-button"
             button_label.style.horizontally_stretchable = true
             button_label.style.maximal_width = preview_size
+        end
+    end
+)
+
+script.on_event(defines.events.on_gui_closed,
+    function(e)
+        local frame = frames[e.player_index]
+        if frame and frame.valid then
+            frame.destroy()
+            frames[e.player_index] = nil
         end
     end
 )
