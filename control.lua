@@ -1,12 +1,9 @@
 -- print(serpent.block())
-
 script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_entity},
     function(e)
         if type(global.train_stops) ~= "table" then
             global.train_stops = {}
         end
-
-        print(e.created_entity.name)
 
         if e.created_entity.name == "train-stop" then
             table.insert(global.train_stops, e.created_entity)
@@ -38,6 +35,8 @@ function find_train_stop(entity)
 end
 
 local frames = {}
+-- buttons[button.index] = train_stop
+local buttons = {}
 
 script.on_event("open-train-stop-overview",
     function(e)
@@ -88,7 +87,7 @@ script.on_event("open-train-stop-overview",
             player.force.chart(train_stop.surface, area)
 
             -- create button with text and chart
-            local button = tableView.add{type = "button", name = train_stop.backer_name}
+            local button = tableView.add{type = "button", name = train_stop.unit_number}
             button.style.height = preview_size + 32 + 8
             button.style.width = preview_size + 8
             button.style.left_padding = 0
@@ -121,6 +120,8 @@ script.on_event("open-train-stop-overview",
             button_label.style.font  = "default-dialog-button"
             button_label.style.horizontally_stretchable = true
             button_label.style.maximal_width = preview_size
+
+            buttons[button.index] = train_stop
         end
     end
 )
@@ -132,6 +133,18 @@ script.on_event(defines.events.on_gui_closed,
             frame.destroy()
             frames[e.player_index] = nil
         end
+    end
+)
+
+script.on_event(defines.events.on_gui_click,
+    function(e)
+        if not e.element or not e.element.valid then return end
+        local train_stop = buttons[e.element.index]
+
+        if not train_stop or not train_stop.valid then return end
+
+        local player = game.get_player(e.player_index)
+        player.opened = train_stop
     end
 )
 
