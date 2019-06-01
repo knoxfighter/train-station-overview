@@ -176,7 +176,11 @@ script.on_event(defines.events.on_gui_click,
 )
 
 script.on_configuration_changed(function()
-    if type(global.train_stops) ~= "table" then
+    if global.train_stops then
+        for i, _ in ipairs(global.train_stops) do
+            global.train_stops[i] = nil
+        end
+    else
         global.train_stops = {}
     end
 
