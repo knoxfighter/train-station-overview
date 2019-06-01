@@ -11,6 +11,12 @@ function create_gui(player_index)
 
     -- create basic gui frame
     local frame = player.gui.center.add{type = "frame", direction = "vertical"}
+    local max_height = player.display_resolution.height * 0.8 / player.display_scale
+
+    if max_height > player.display_resolution.height / player.display_scale then
+        max_height = (player.display_resolution.height - 10) / player.display_scale
+    end
+    frame.style.maximal_height = max_height
 
     -- open frame (this is the gui shown to the player)
     player.opened = frame
@@ -172,6 +178,17 @@ script.on_event(defines.events.on_gui_click,
 
         local player = game.get_player(e.player_index)
         player.opened = train_stop
+    end
+)
+
+script.on_event(defines.events.on_player_display_resolution_changed,
+    function(e)
+        local frame = frames[e.player_index]
+        if frame and frame.valid then
+            frame.destroy()
+            frames[e.player_index] = nil
+            create_gui(e.player_index)
+        end
     end
 )
 
