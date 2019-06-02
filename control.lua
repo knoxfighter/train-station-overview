@@ -113,7 +113,6 @@ function create_gui(player_index)
         button_map.ignored_by_interaction = true
 
         -- show amount of trains stopping here
-        print(serpent.block(train_stop.get_train_stop_trains()))
         local train_amount_label = button_flow.add{type = "label", caption = {"train-amount", #train_stop.get_train_stop_trains()}}
         train_amount_label.style.horizontally_stretchable = true
         train_amount_label.style.font_color = {}
