@@ -75,7 +75,7 @@ function create_gui(player_index)
 
         -- create button with text and chart
         local button = tableView.add{type = "button", name = train_stop.unit_number}
-        button.style.height = preview_size + 32 + 8
+        button.style.height = preview_size + 32 + 32 + 8 --32 for each label
         button.style.width = preview_size + 8
         button.style.left_padding = 0
         button.style.right_padding = 0
@@ -85,11 +85,19 @@ function create_gui(player_index)
         end
 
         -- set flow to button (multiple elements inside the button)
-        local button_flow = button.add{type = "flow", direction = "vertical"} --ignored_by_interaction = true
+        local button_flow = button.add{type = "flow", direction = "vertical"}
         button_flow.style.vertically_stretchable = true
         button_flow.style.horizontally_stretchable = true
         button_flow.style.horizontal_align = "center"
         button_flow.ignored_by_interaction = true
+
+        -- add label to the button
+        local button_label = button_flow.add{type = "label", caption = train_stop.backer_name}
+        button_label.style.horizontally_stretchable = true
+        button_label.style.font_color = {} --black
+        button_label.style.font  = "default-dialog-button"
+        button_label.style.horizontally_stretchable = true
+        button_label.style.maximal_width = preview_size
 
         -- add map to the button
         local button_map = button_flow.add{
@@ -104,13 +112,13 @@ function create_gui(player_index)
         button_map.style.vertically_stretchable = true
         button_map.ignored_by_interaction = true
 
-        -- add label to the button
-        local button_label = button_flow.add{type = "label", caption = train_stop.backer_name}
-        button_label.style.horizontally_stretchable = true
-        button_label.style.font_color = {} --black
-        button_label.style.font  = "default-dialog-button"
-        button_label.style.horizontally_stretchable = true
-        button_label.style.maximal_width = preview_size
+        -- show amount of trains stopping here
+        print(serpent.block(train_stop.get_train_stop_trains()))
+        local train_amount_label = button_flow.add{type = "label", caption = {"train-amount", #train_stop.get_train_stop_trains()}}
+        train_amount_label.style.horizontally_stretchable = true
+        train_amount_label.style.font_color = {}
+        train_amount_label.style.horizontally_stretchable = true
+        train_amount_label.style.maximal_width = preview_size
 
         if not buttons[player_index] then
             buttons[player_index] = {}
