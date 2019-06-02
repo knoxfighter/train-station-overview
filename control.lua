@@ -1,9 +1,15 @@
 -- print(serpent.block())
 
--- frames[player_index.index] = frame
+-- frames[player.index] = frame
 local frames = {}
--- buttons[button.index] = train_stop
+-- buttons[player.index][button.index] = { button = button, train_stop = train_stop }
 local buttons = {}
+-- search_boxes[searchButton.index] = textfield
+local search_boxes = {}
+-- search_buttons[player.index] = search_button
+local search_text_fields = {}
+-- search_text[player.index] = text
+local search_text = {}
 
 function create_gui(player_index)
     -- get player
@@ -22,14 +28,17 @@ function create_gui(player_index)
     player.opened = frame
     frames[player.index] = frame
 
+    -- header
     local titleFlow = frame.add{type = "flow", direction = "horizontal"}
-
     local title = titleFlow.add{type = "label", style = "heading_1_label", caption = {"train-stops"}}
-
     local fillerFlow = titleFlow.add{type = "flow", direction = "horizontal"}
     fillerFlow.style.horizontally_stretchable = true
 
-    --TODO add search
+    -- search
+    local search_text_field = titleFlow.add{ type = "textfield", visible = search_text[player_index] ~= nil, text = search_text[player_index]}
+    local search_button = titleFlow.add{ type = "sprite-button", style = "tool_button", sprite = "utility/search_icon", tooltip = { "gui.search-with-focus", { "search"}}}
+    search_boxes[search_button.index] = search_text_field
+    search_text_fields[search_text_field.index] = search_text_field
 
     if #global.train_stops < 1 then
         frame.add{type = "label", caption = {"no-train-stops"}}
@@ -71,7 +80,11 @@ function create_gui(player_index)
         button.style.left_padding = 0
         button.style.right_padding = 0
 
-        -- set flow to button (multiple elemts inside the button)
+        if search_text[player_index] then
+            button.visible = train_stop.backer_name:lower():find(search_text[player_index]:lower())
+        end
+
+        -- set flow to button (multiple elements inside the button)
         local button_flow = button.add{type = "flow", direction = "vertical"} --ignored_by_interaction = true
         button_flow.style.vertically_stretchable = true
         button_flow.style.horizontally_stretchable = true
@@ -99,7 +112,11 @@ function create_gui(player_index)
         button_label.style.horizontally_stretchable = true
         button_label.style.maximal_width = preview_size
 
-        buttons[button.index] = train_stop
+        if not buttons[player_index] then
+            buttons[player_index] = {}
+        end
+        buttons[player_index][button.index] = {}
+        buttons[player_index][button.index] = {train_stop = train_stop, button = button}
     end
 end
 
@@ -161,23 +178,58 @@ script.on_event("open-train-stop-overview",
 
 script.on_event(defines.events.on_gui_closed,
     function(e)
+        -- close gui
         local frame = frames[e.player_index]
         if frame and frame.valid then
             frame.destroy()
             frames[e.player_index] = nil
         end
+
+        -- reset data
+        search_text[e.player_index] = nil
+        buttons[e.player_index] = nil
+        search_boxes[e.player_index] = nil
+        search_text_fields[e.player_index] = nil
     end
 )
 
 script.on_event(defines.events.on_gui_click,
     function(e)
         if not e.element or not e.element.valid then return end
-        local train_stop = buttons[e.element.index]
-
-        if not train_stop or not train_stop.valid then return end
-
         local player = game.get_player(e.player_index)
-        player.opened = train_stop
+
+        -- open train_stop GUI
+        if buttons[e.player_index] and buttons[e.player_index][e.element.index] then
+            local train_stop = buttons[e.player_index][e.element.index].train_stop
+            if train_stop and train_stop.valid then
+                player.opened = train_stop
+                return
+            end
+        end
+
+        -- toggle search field
+        local search_field = search_boxes[e.element.index]
+        if search_field and search_field.valid then
+            if search_field.visible then
+                search_field.visible = false
+            else
+                search_field.visible = true
+            end
+            return
+        end
+    end
+)
+
+script.on_event(defines.events.on_gui_text_changed,
+    function(e)
+        local search_button = search_text_fields[e.element.index]
+        if search_button and search_button.valid then
+            search_text[e.player_index] = search_button.text
+
+            for _, button_data in pairs(buttons[e.player_index]) do
+                button_data.button.visible = button_data.train_stop.backer_name:lower():find(search_text[e.player_index]:lower())
+            end
+        end
     end
 )
 
