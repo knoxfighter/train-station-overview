@@ -222,6 +222,7 @@ script.on_event(defines.events.on_gui_click,
                 search_field.visible = false
             else
                 search_field.visible = true
+                search_field.focus()
             end
             return
         end
