@@ -268,7 +268,6 @@ script.on_event(defines.events.on_player_display_resolution_changed,
 script.on_event(defines.events.on_entity_renamed,
     function(e)
         if e.entity.name == "train-stop" then
-            -- TODO reorder entity
             local pos = find_train_stop(e.entity)
             table.remove(global.train_stops, pos)
             insert_sorted(e.entity)
