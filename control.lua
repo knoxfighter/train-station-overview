@@ -192,7 +192,12 @@ end
 
 script.on_event("open-train-stop-overview",
     function(e)
-        create_gui(e.player_index)
+        local player_frame = frames[e.player_index]
+        if player_frame and player_frame.valid then
+            player_frame.destroy()
+        else
+            create_gui(e.player_index)
+        end
     end
 )
 
