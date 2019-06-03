@@ -138,6 +138,19 @@ function refresh_gui()
     end
 end
 
+function insert_sorted(entity)
+    local inserted = false
+    for index, train_stop in pairs(global.train_stops) do
+        if entity.backer_name:lower() < train_stop.backer_name:lower() then
+            table.insert(global.train_stops, index, entity)
+            return
+        end
+    end
+    if inserted == false then
+        table.insert(global.train_stops, entity)
+    end
+end
+
 script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_entity},
     function(e)
         if type(global.train_stops) ~= "table" then
@@ -145,7 +158,7 @@ script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_e
         end
 
         if e.created_entity.name == "train-stop" then
-            table.insert(global.train_stops, e.created_entity)
+            insert_sorted(e.created_entity)
 
             refresh_gui()
         end
@@ -252,16 +265,27 @@ script.on_event(defines.events.on_player_display_resolution_changed,
     end
 )
 
+script.on_event(defines.events.on_entity_renamed,
+    function(e)
+        if e.entity.name == "train-stop" then
+            -- TODO reorder entity
+            local pos = find_train_stop(e.entity)
+            table.remove(global.train_stops, pos)
+            insert_sorted(e.entity)
+        end
+    end
+)
+
 script.on_configuration_changed(function()
     if global.train_stops then
-        for i, _ in ipairs(global.train_stops) do
+        for i, _ in pairs(global.train_stops) do
             global.train_stops[i] = nil
         end
     else
         global.train_stops = {}
     end
 
-    for _, trainstop in pairs(game.get_surface(1).find_entities_filtered{name="train-stop"}) do
-        table.insert(global.train_stops, trainstop)
+    for _, train_stop in pairs(game.get_surface(1).find_entities_filtered{name="train-stop"}) do
+        insert_sorted(train_stop)
     end
 end)
