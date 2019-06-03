@@ -127,12 +127,24 @@ function create_gui(player_index)
     end
 end
 
+function close_gui(player_index)
+    local frame = frames[player_index]
+    if frame and frame.valid then
+        frame.destroy()
+        frames[player_index] = nil
+    end
+
+    -- reset data
+    search_text[player_index] = nil
+    buttons[player_index] = nil
+    search_boxes[player_index] = nil
+    search_text_fields[player_index] = nil
+end
+
 function refresh_gui()
     -- close and open all GUIs
-    for player_index, frame in pairs(frames) do
-        if frame and frame.valid then
-            frame.destroy()
-        end
+    for player_index, _ in pairs(frames) do
+        close_gui(player_index)
 
         create_gui(player_index)
     end
@@ -194,7 +206,7 @@ script.on_event("open-train-stop-overview",
     function(e)
         local player_frame = frames[e.player_index]
         if player_frame and player_frame.valid then
-            player_frame.destroy()
+            close_gui(e.player_index)
         else
             create_gui(e.player_index)
         end
@@ -204,17 +216,7 @@ script.on_event("open-train-stop-overview",
 script.on_event(defines.events.on_gui_closed,
     function(e)
         -- close gui
-        local frame = frames[e.player_index]
-        if frame and frame.valid then
-            frame.destroy()
-            frames[e.player_index] = nil
-        end
-
-        -- reset data
-        search_text[e.player_index] = nil
-        buttons[e.player_index] = nil
-        search_boxes[e.player_index] = nil
-        search_text_fields[e.player_index] = nil
+        close_gui(e.player_index)
     end
 )
 
@@ -261,12 +263,8 @@ script.on_event(defines.events.on_gui_text_changed,
 
 script.on_event(defines.events.on_player_display_resolution_changed,
     function(e)
-        local frame = frames[e.player_index]
-        if frame and frame.valid then
-            frame.destroy()
-            frames[e.player_index] = nil
-            create_gui(e.player_index)
-        end
+        close_gui(e.player_index)
+        create_gui(e.player_index)
     end
 )
 
@@ -276,6 +274,8 @@ script.on_event(defines.events.on_entity_renamed,
             local pos = find_train_stop(e.entity)
             table.remove(global.train_stops, pos)
             insert_sorted(e.entity)
+
+            refresh_gui()
         end
     end
 )
