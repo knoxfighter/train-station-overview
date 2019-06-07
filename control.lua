@@ -1,5 +1,7 @@
 -- print(serpent.block())
 
+local util = require("util")
+
 -- frames[player.index] = frame
 local frames = {}
 -- buttons[player.index][button.index] = { button = button, train_stop = train_stop }
@@ -10,6 +12,22 @@ local search_boxes = {}
 local search_text_fields = {}
 -- search_text[player.index] = text
 local search_text = {}
+
+-- returns true if ALL keys are found
+function filter_station(player_index, train_stop)
+    print(search_text[player_index])
+    if search_text[player_index] then
+        local search_keys = util.split_whitespace(search_text[player_index])
+        local backer_name = train_stop.backer_name:lower()
+
+        for _, search_key in pairs(search_keys) do
+            if not backer_name:find(search_key:lower()) then
+                return false
+            end
+        end
+    end
+    return true
+end
 
 function create_gui(player_index)
     -- get player
@@ -80,9 +98,7 @@ function create_gui(player_index)
         button.style.left_padding = 0
         button.style.right_padding = 0
 
-        if search_text[player_index] then
-            button.visible = train_stop.backer_name:lower():find(search_text[player_index]:lower())
-        end
+        button.visible = filter_station(player_index, train_stop)
 
         -- set flow to button (multiple elements inside the button)
         local button_flow = button.add{type = "flow", direction = "vertical"}
@@ -135,10 +151,7 @@ function close_gui(player_index)
     end
 
     -- reset data
-    search_text[player_index] = nil
     buttons[player_index] = nil
-    search_boxes[player_index] = nil
-    search_text_fields[player_index] = nil
 end
 
 function refresh_gui()
@@ -223,8 +236,10 @@ script.on_event("open-train-stop-overview",
 
 script.on_event(defines.events.on_gui_closed,
     function(e)
-        -- close gui
         close_gui(e.player_index)
+        search_text[e.player_index] = nil
+        search_boxes[e.player_index] = nil
+        search_text_fields[e.player_index] = nil
     end
 )
 
@@ -263,7 +278,9 @@ script.on_event(defines.events.on_gui_text_changed,
             search_text[e.player_index] = search_button.text
 
             for _, button_data in pairs(buttons[e.player_index]) do
-                button_data.button.visible = button_data.train_stop.backer_name:lower():find(search_text[e.player_index]:lower())
+                if button_data.button and button_data.button.valid and button_data.train_stop and button_data.train_stop.valid then
+                    button_data.button.visible = filter_station(e.player_index, button_data.train_stop)
+                end
             end
         end
     end
