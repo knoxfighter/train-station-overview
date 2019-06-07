@@ -276,9 +276,11 @@ script.on_event(defines.events.on_gui_text_changed,
         if search_button and search_button.valid then
             search_text[e.player_index] = search_button.text
 
-            for _, button_data in pairs(buttons[e.player_index]) do
-                if button_data.button and button_data.button.valid and button_data.train_stop and button_data.train_stop.valid then
-                    button_data.button.visible = filter_station(e.player_index, button_data.train_stop)
+            if buttons[e.player_index] then
+                for _, button_data in pairs(buttons[e.player_index]) do
+                    if button_data.button and button_data.button.valid and button_data.train_stop and button_data.train_stop.valid then
+                        button_data.button.visible = filter_station(e.player_index, button_data.train_stop)
+                    end
                 end
             end
         end
