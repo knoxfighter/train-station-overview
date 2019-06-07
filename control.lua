@@ -15,7 +15,6 @@ local search_text = {}
 
 -- returns true if ALL keys are found
 function filter_station(player_index, train_stop)
-    print(search_text[player_index])
     if search_text[player_index] then
         local search_keys = util.split_whitespace(search_text[player_index])
         local backer_name = train_stop.backer_name:lower()
