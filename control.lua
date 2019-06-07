@@ -163,6 +163,14 @@ function insert_sorted(entity)
     end
 end
 
+function gui_is_opened(player_index)
+    if frames[player_index] then
+        return true
+    else
+        return false
+    end
+end
+
 script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_entity},
     function(e)
         if type(global.train_stops) ~= "table" then
@@ -263,8 +271,10 @@ script.on_event(defines.events.on_gui_text_changed,
 
 script.on_event(defines.events.on_player_display_resolution_changed,
     function(e)
-        close_gui(e.player_index)
-        create_gui(e.player_index)
+        if gui_is_opened(e.player_index) then
+            close_gui(e.player_index)
+            create_gui(e.player_index)
+        end
     end
 )
 
@@ -280,7 +290,8 @@ script.on_event(defines.events.on_entity_renamed,
     end
 )
 
-script.on_configuration_changed(function()
+--script.on_configuration_changed(function()
+script.on_init(function()
     if global.train_stops then
         for i, _ in pairs(global.train_stops) do
             global.train_stops[i] = nil
