@@ -1,0 +1,8 @@
+Version: x.x.x
+Date: ??.??.????
+  Features:
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Date: 08.06.2019
+  Features:
+    - Initial release. Adds the overview to the game.
