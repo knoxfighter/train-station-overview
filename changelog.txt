@@ -1,6 +1,8 @@
-Version: x.x.x
-Date: ??.??.????
-  Features:
+Version: 1.0.1
+Date: 08.06.2019
+  Miscellaneous:
+    - added Changelog
+    - added thumbnail
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.0
 Date: 08.06.2019
