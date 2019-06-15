@@ -403,7 +403,7 @@ script.on_event(defines.events.on_entity_renamed,
     end
 )
 
-script.on_init(function()
+function on_load()
     if global.train_stops then
         for i, _ in pairs(global.train_stops) do
             global.train_stops[i] = nil
@@ -415,4 +415,10 @@ script.on_init(function()
     for _, train_stop in pairs(game.get_surface(1).find_entities_filtered{name={"train-stop", "logistic-train-stop"}}) do
         insert_sorted(train_stop)
     end
-end)
+end
+
+-- on new setup and when mod changes, all stops will be added new
+script.on_init(on_load)
+
+-- If some mod is changed, so train-stops are not valid anymore ... also reload
+script.on_configuration_changed(on_load)
