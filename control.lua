@@ -166,7 +166,7 @@ function create_gui(player_index)
             local bottom_scroll_pane = bottom_flow.add{type = "scroll-pane"}
             bottom_scroll_pane.style.width = list_width + 20 -- size of scrollbar
             bottom_scroll_pane.style.bottom_margin = 5
-            bottom_scroll_pane.style.maximal_height = 150
+            bottom_scroll_pane.style.maximal_height = preview_size
             bottom_scroll_pane.style.extra_padding_when_activated = 0
 
             -- add flow control to the scroll-pane
