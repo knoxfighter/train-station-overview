@@ -4,8 +4,12 @@ local util = require("util")
 
 -- frames[player.index] = frame
 local frames = {}
--- buttons[player.index][button.index] = { button = button, train_stop = train_stop }
+-- cards[player.index][card.index] = { card = card, train_stop_name = train_stop.backer_name }
+local cards = {}
+-- buttons[player.index][button.index] = train_stop
 local buttons = {}
+-- map_buttons[player.index][map_buttons.index] = train_stop
+local map_buttons = {}
 -- search_boxes[searchButton.index] = textfield
 local search_boxes = {}
 -- search_buttons[player.index] = search_button
@@ -14,10 +18,10 @@ local search_text_fields = {}
 local search_text = {}
 
 -- returns true if ALL keys are found
-function filter_station(player_index, train_stop)
+function filter_station(player_index, train_stop_name)
     if search_text[player_index] then
         local search_keys = util.split_whitespace(search_text[player_index])
-        local backer_name = train_stop.backer_name:lower()
+        local backer_name = train_stop_name:lower()
 
         for _, search_key in pairs(search_keys) do
             if not backer_name:find(search_key:lower()) then
@@ -63,16 +67,27 @@ function create_gui(player_index)
     end
 
     -- Inner Frame with scrollbar and tableview
-    local innerFrame = frame.add{type = "frame", style = "inside_deep_frame"}
-    local scroll = innerFrame.add{type = "scroll-pane", direction = "vertical"}
+    local scroll = frame.add{type = "scroll-pane", direction = "vertical"}
     local tableView = scroll.add{type = "table", column_count = 7}
 
     -- set table spacing
     tableView.style.horizontal_spacing = 4
     tableView.style.vertical_spacing = 4
 
+
+    -- define constants
     local preview_size = 160
     local preview_size_half = preview_size / 2
+
+    local name_label_height = 24
+    local stop_height = preview_size + name_label_height + 32 + 8 + 16
+    local stop_width = preview_size + 152
+    local list_width = 112
+
+    local previous_backer_name = ""
+    local station_amount_label
+    local station_amount = 0
+    local bottom_scroll
 
     for _, train_stop in pairs(global.train_stops) do
         local position = train_stop.position
@@ -90,55 +105,114 @@ function create_gui(player_index)
         -- create a chart of the area (has no return-value)
         player.force.chart(train_stop.surface, area)
 
-        -- create button with text and chart
-        local button = tableView.add{type = "button", name = train_stop.unit_number}
-        button.style.height = preview_size + 32 + 32 + 8 --32 for each label
-        button.style.width = preview_size + 8
-        button.style.left_padding = 0
-        button.style.right_padding = 0
+        if previous_backer_name == train_stop.backer_name then
+            -- update train amount
+            station_amount = station_amount + 1
+            station_amount_label.caption = "Stations: "..station_amount
+        else
+            ---- Generate new card
+            previous_backer_name = train_stop.backer_name
+            station_amount = 1
+            -- general design
+            local card = tableView.add{ type = "frame"}
+            card.style.height = stop_height
+            card.style.width = stop_width
+            card.style.top_padding = 0
+            card.style.right_padding = 4
+            card.style.bottom_padding = 0
+            card.style.left_padding = 4
+            card.visible = filter_station(player_index, train_stop.backer_name)
 
-        button.visible = filter_station(player_index, train_stop)
+            -- add card to list
+            if not cards[player_index] then
+                cards[player_index] = {}
+            end
+            cards[player_index][card.index] = {}
+            cards[player_index][card.index] = { train_stop_name = train_stop.backer_name, card = card}
 
-        -- set flow to button (multiple elements inside the button)
-        local button_flow = button.add{type = "flow", direction = "vertical"}
-        button_flow.style.vertically_stretchable = true
-        button_flow.style.horizontally_stretchable = true
-        button_flow.style.horizontal_align = "center"
-        button_flow.ignored_by_interaction = true
+            -- item flow to control spacing
+            local card_flow = card.add{ type = "flow", direction = "vertical"}
+            card_flow.style.vertical_spacing = 0
 
-        -- add label to the button
-        local button_label = button_flow.add{type = "label", caption = train_stop.backer_name}
-        button_label.style.horizontally_stretchable = true
-        button_label.style.font_color = {} --black
-        button_label.style.font  = "default-dialog-button"
-        button_label.style.horizontally_stretchable = true
-        button_label.style.maximal_width = preview_size
+            -- Station name
+            local name_label = card_flow.add{ type = "label", caption = train_stop.backer_name}
+            name_label.style.horizontally_stretchable = true
+            name_label.style.font_color = { 255, 255, 255} --white
+            name_label.style.font  = "default-dialog-button"
+            name_label.style.horizontally_stretchable = true
+            name_label.style.maximal_width = stop_width
+            name_label.style.margin = 0
+            name_label.style.padding = 0
+            name_label.style.height = name_label_height
 
-        -- add map to the button
-        local button_map = button_flow.add{
-            type = "minimap",
-            position = position,
-            surface_index = train_stop.surface.index
-        }
+            -- amount of stations with this name
+            station_amount_label = card_flow.add{ type = "label"}
+            station_amount_label.caption = "Stations: "..station_amount
+            station_amount_label.style.margin = 0
+            station_amount_label.style.padding = 0
 
-        button_map.style.height = preview_size
-        button_map.style.width = preview_size
-        button_map.style.horizontally_stretchable = true
-        button_map.style.vertically_stretchable = true
-        button_map.ignored_by_interaction = true
+            -- amount of trains, that stop at this station
+            local train_amount_label = card_flow.add{type = "label"}
+            train_amount_label.caption = "Trains: " .. #train_stop.get_train_stop_trains()
+            train_amount_label.style.bottom_margin = 5
 
-        -- show amount of trains stopping here
-        local train_amount_label = button_flow.add{type = "label", caption = {"train-amount", #train_stop.get_train_stop_trains()}}
-        train_amount_label.style.horizontally_stretchable = true
-        train_amount_label.style.font_color = {}
-        train_amount_label.style.horizontally_stretchable = true
-        train_amount_label.style.maximal_width = preview_size
+            local bottom_flow = card_flow.add{type = "flow", direction = "horizontal"}
 
+            -- scroll-pane, when more than 5 stations with this name exist
+            local bottom_scroll_pane = bottom_flow.add{type = "scroll-pane"}
+            bottom_scroll_pane.style.width = list_width + 20 -- size of scrollbar
+            bottom_scroll_pane.style.bottom_margin = 5
+            bottom_scroll_pane.style.maximal_height = 150
+            bottom_scroll_pane.style.extra_padding_when_activated = 0
+
+            -- add flow control to the scroll-pane
+            bottom_scroll = bottom_scroll_pane.add{type = "flow", direction = "vertical"}
+            bottom_scroll.style.vertical_spacing = 0
+            bottom_scroll.style.width = list_width
+
+            -- add mini-map
+            local map = bottom_flow.add{
+                type = "minimap",
+                position = position,
+                surface_index = train_stop.surface.index
+            }
+            map.style.height = preview_size
+            map.style.width = preview_size
+            map.style.horizontally_stretchable = true
+            map.style.vertically_stretchable = true
+        end
+
+        -- add container to the scroll-pane
+        local station_container = bottom_scroll.add{ type = "flow", direction = "horizontal"}
+
+        -- add button that opens the station directly
+        local station_button = station_container.add{ type = "button", direction = "horizontal"}
+        station_button.style.width = 80
+
+        -- add station name on top of the button
+        local station_button_label = station_button.add{ type = "label"}
+        station_button_label.caption = "Station " .. station_amount
+        station_button_label.style.font_color = {} --black
+        station_button_label.ignored_by_interaction = true
+
+        -- add button that opens the map with the station centered
+        local station_map_button = station_container.add{ type = "sprite-button"}
+        station_map_button.sprite = "train-station-overview-map-sprite"
+        station_map_button.style.width = 28
+        station_map_button.style.height = 28
+        station_map_button.style.padding = 0
+
+        -- add station button to the global array
         if not buttons[player_index] then
             buttons[player_index] = {}
         end
-        buttons[player_index][button.index] = {}
-        buttons[player_index][button.index] = {train_stop = train_stop, button = button}
+        buttons[player_index][station_button.index] = train_stop
+
+        -- add map button to the global array
+        if not map_buttons[player_index] then
+            map_buttons[player_index] = {}
+        end
+        map_buttons[player_index][station_map_button.index] = train_stop
     end
 end
 
@@ -151,14 +225,25 @@ function close_gui(player_index)
 
     -- reset data
     buttons[player_index] = nil
+    map_buttons[player_index] = nil
 end
 
-function refresh_gui()
+function close_gui_clear(player_index)
+    close_gui(player_index)
+    search_text[player_index] = nil
+    search_boxes[player_index] = nil
+    search_text_fields[player_index] = nil
+end
+
+function refresh_gui(player_index)
+    close_gui(player_index)
+    create_gui(player_index)
+end
+
+function refresh_all_guis()
     -- close and open all GUIs
     for player_index, _ in pairs(frames) do
-        close_gui(player_index)
-
-        create_gui(player_index)
+        refresh_gui(player_index)
     end
 end
 
@@ -176,7 +261,7 @@ function insert_sorted(entity)
 end
 
 function gui_is_opened(player_index)
-    if frames[player_index] then
+    if frames[player_index] and frames[player_index].valid then
         return true
     else
         return false
@@ -192,7 +277,7 @@ script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_e
         if e.created_entity.name == "train-stop" then
             insert_sorted(e.created_entity)
 
-            refresh_gui()
+            refresh_all_guis()
         end
     end
 )
@@ -208,7 +293,7 @@ script.on_event({defines.events.on_entity_died, defines.events.on_player_mined_e
 
             table.remove(global.train_stops, pos)
 
-            refresh_gui()
+            refresh_all_guis()
         end
     end
 )
@@ -224,9 +309,8 @@ end
 
 script.on_event("open-train-stop-overview",
     function(e)
-        local player_frame = frames[e.player_index]
-        if player_frame and player_frame.valid then
-            close_gui(e.player_index)
+        if gui_is_opened() then
+            close_gui_clear(e.player_index)
         else
             create_gui(e.player_index)
         end
@@ -235,10 +319,7 @@ script.on_event("open-train-stop-overview",
 
 script.on_event(defines.events.on_gui_closed,
     function(e)
-        close_gui(e.player_index)
-        search_text[e.player_index] = nil
-        search_boxes[e.player_index] = nil
-        search_text_fields[e.player_index] = nil
+        close_gui_clear(e.player_index)
     end
 )
 
@@ -246,15 +327,6 @@ script.on_event(defines.events.on_gui_click,
     function(e)
         if not e.element or not e.element.valid then return end
         local player = game.get_player(e.player_index)
-
-        -- open train_stop GUI
-        if buttons[e.player_index] and buttons[e.player_index][e.element.index] then
-            local train_stop = buttons[e.player_index][e.element.index].train_stop
-            if train_stop and train_stop.valid then
-                player.opened = train_stop
-                return
-            end
-        end
 
         -- toggle search field
         local search_field = search_boxes[e.element.index]
@@ -267,6 +339,24 @@ script.on_event(defines.events.on_gui_click,
             end
             return
         end
+
+        -- open train_stop GUI
+        if buttons[e.player_index] and buttons[e.player_index][e.element.index] then
+            local train_stop = buttons[e.player_index][e.element.index]
+            if train_stop and train_stop.valid then
+                player.opened = train_stop
+                return
+            end
+        end
+
+        -- open train_stop on map
+        if map_buttons[e.player_index] and map_buttons[e.player_index][e.element.index] then
+            local train_stop = map_buttons[e.player_index][e.element.index]
+            if train_stop and train_stop.valid then
+                player.open_map(train_stop.position, 0.4)
+                close_gui_clear(e.player_index)
+            end
+        end
     end
 )
 
@@ -276,10 +366,10 @@ script.on_event(defines.events.on_gui_text_changed,
         if search_button and search_button.valid then
             search_text[e.player_index] = search_button.text
 
-            if buttons[e.player_index] then
-                for _, button_data in pairs(buttons[e.player_index]) do
-                    if button_data.button and button_data.button.valid and button_data.train_stop and button_data.train_stop.valid then
-                        button_data.button.visible = filter_station(e.player_index, button_data.train_stop)
+            if cards[e.player_index] then
+                for _, card_data in pairs(cards[e.player_index]) do
+                    if card_data.card and card_data.card.valid and card_data.train_stop_name then
+                        card_data.card.visible = filter_station(e.player_index, card_data.train_stop_name)
                     end
                 end
             end
@@ -290,8 +380,7 @@ script.on_event(defines.events.on_gui_text_changed,
 script.on_event(defines.events.on_player_display_resolution_changed,
     function(e)
         if gui_is_opened(e.player_index) then
-            close_gui(e.player_index)
-            create_gui(e.player_index)
+            refresh_gui(e.player_index)
         end
     end
 )
@@ -303,7 +392,7 @@ script.on_event(defines.events.on_entity_renamed,
             table.remove(global.train_stops, pos)
             insert_sorted(e.entity)
 
-            refresh_gui()
+            refresh_all_guis()
         end
     end
 )
