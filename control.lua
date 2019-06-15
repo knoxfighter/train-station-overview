@@ -112,7 +112,7 @@ function create_gui(player_index)
         if previous_backer_name == train_stop.backer_name then
             -- update train amount
             station_amount = station_amount + 1
-            station_amount_label.caption = "Stations: "..station_amount
+            station_amount_label.caption = {"station-amount", station_amount}
         else
             ---- Generate new card
             previous_backer_name = train_stop.backer_name
@@ -151,13 +151,13 @@ function create_gui(player_index)
 
             -- amount of stations with this name
             station_amount_label = card_flow.add{ type = "label"}
-            station_amount_label.caption = "Stations: "..station_amount
+            station_amount_label.caption = {"station-amount", station_amount}
             station_amount_label.style.margin = 0
             station_amount_label.style.padding = 0
 
             -- amount of trains, that stop at this station
             local train_amount_label = card_flow.add{type = "label"}
-            train_amount_label.caption = "Trains: " .. #train_stop.get_train_stop_trains()
+            train_amount_label.caption = {"train-amount", #train_stop.get_train_stop_trains()}
             train_amount_label.style.bottom_margin = 5
 
             local bottom_flow = card_flow.add{type = "flow", direction = "horizontal"}
@@ -192,10 +192,11 @@ function create_gui(player_index)
         -- add button that opens the station directly
         local station_button = station_container.add{ type = "button", direction = "horizontal"}
         station_button.style.width = 80
+        station_button.tooltip = {"station-button-tooltip"}
 
         -- add station name on top of the button
         local station_button_label = station_button.add{ type = "label"}
-        station_button_label.caption = "Station " .. station_amount
+        station_button_label.caption = {"station-name", station_amount}
         station_button_label.style.font_color = {} --black
         station_button_label.ignored_by_interaction = true
 
@@ -205,6 +206,7 @@ function create_gui(player_index)
         station_map_button.style.width = 28
         station_map_button.style.height = 28
         station_map_button.style.padding = 0
+        station_map_button.tooltip = {"open-on-map-tooltip"}
 
         -- add station button to the global array
         if not buttons[player_index] then
