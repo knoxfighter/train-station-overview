@@ -33,6 +33,20 @@ function filter_station(player_index, train_stop_name)
 end
 
 function create_gui(player_index)
+    -- define constants
+    local preview_size = 160
+    local preview_size_half = preview_size / 2
+
+    local name_label_height = 24
+    local stop_height = preview_size + name_label_height + 32 + 8 + 16
+    local stop_width = preview_size + 152
+    local list_width = 112
+
+    local previous_backer_name = ""
+    local station_amount_label
+    local station_amount = 0
+    local bottom_scroll
+
     -- get player
     local player = game.get_player(player_index)
 
@@ -66,28 +80,18 @@ function create_gui(player_index)
         return
     end
 
+    local max_columns = (player.display_resolution.width / (stop_width + 50))
+    if max_columns < 1 then
+        max_columns = 1
+    end
+
     -- Inner Frame with scrollbar and tableview
     local scroll = frame.add{type = "scroll-pane", direction = "vertical"}
-    local tableView = scroll.add{type = "table", column_count = 7}
+    local tableView = scroll.add{type = "table", column_count = max_columns}
 
     -- set table spacing
     tableView.style.horizontal_spacing = 4
     tableView.style.vertical_spacing = 4
-
-
-    -- define constants
-    local preview_size = 160
-    local preview_size_half = preview_size / 2
-
-    local name_label_height = 24
-    local stop_height = preview_size + name_label_height + 32 + 8 + 16
-    local stop_width = preview_size + 152
-    local list_width = 112
-
-    local previous_backer_name = ""
-    local station_amount_label
-    local station_amount = 0
-    local bottom_scroll
 
     for _, train_stop in pairs(global.train_stops) do
         local position = train_stop.position
