@@ -280,7 +280,7 @@ script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_e
             global.train_stops = {}
         end
 
-        if e.created_entity.name == "train-stop" then
+        if e.created_entity.name == "train-stop" or e.created_entity.name == "logistic-train-stop" then
             insert_sorted(e.created_entity)
 
             refresh_all_guis()
@@ -290,7 +290,7 @@ script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_e
 
 script.on_event({defines.events.on_entity_died, defines.events.on_player_mined_entity, defines.events.on_robot_mined_entity},
     function(e)
-        if e.entity.name == "train-stop" then
+        if e.entity.name == "train-stop" or e.entity.name == "logistic-train-stop" then
             local pos = find_train_stop(e.entity)
             if pos == 0 then
                 print("train_stop not found, just do nothing!")
@@ -403,7 +403,6 @@ script.on_event(defines.events.on_entity_renamed,
     end
 )
 
---script.on_configuration_changed(function()
 script.on_init(function()
     if global.train_stops then
         for i, _ in pairs(global.train_stops) do
@@ -413,7 +412,7 @@ script.on_init(function()
         global.train_stops = {}
     end
 
-    for _, train_stop in pairs(game.get_surface(1).find_entities_filtered{name="train-stop"}) do
+    for _, train_stop in pairs(game.get_surface(1).find_entities_filtered{name={"train-stop", "logistic-train-stop"}}) do
         insert_sorted(train_stop)
     end
 end)
