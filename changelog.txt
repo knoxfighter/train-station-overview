@@ -4,6 +4,7 @@ Date: 16.06.2019
     - reworked gui
     - added button to open station on map
     - fixed crash, when removing/adding mods
+    - added support for LTN
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.1
 Date: 08.06.2019
