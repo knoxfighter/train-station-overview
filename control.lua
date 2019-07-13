@@ -17,6 +17,29 @@ local search_text_fields = {}
 -- search_text[player.index] = text
 local search_text = {}
 
+function check_station(station)
+    if station then
+        if station.valid then
+            return true
+        else
+            remove_station(station)
+            return false
+        end
+    else
+        return false
+    end
+end
+
+function remove_station(station)
+    local pos = find_train_stop(station)
+    if pos == 0 then
+        print("train_stop not found, just do nothing!")
+        return
+    end
+
+    table.remove(global.train_stops, pos)
+end
+
 -- returns true if ALL keys are found
 function filter_station(player_index, train_stop_name)
     if search_text[player_index] then
@@ -94,131 +117,133 @@ function create_gui(player_index)
     tableView.style.vertical_spacing = 4
 
     for _, train_stop in pairs(global.train_stops) do
-        local position = train_stop.position
-        local area = {
-            {
-                position.x - preview_size_half,
-                position.y - preview_size_half
-            },
-            {
-                position.x + preview_size_half,
-                position.y + preview_size_half
+        if check_station(train_stop) then
+            local position = train_stop.position
+            local area = {
+                {
+                    position.x - preview_size_half,
+                    position.y - preview_size_half
+                },
+                {
+                    position.x + preview_size_half,
+                    position.y + preview_size_half
+                }
             }
-        }
 
-        -- create a chart of the area (has no return-value)
-        player.force.chart(train_stop.surface, area)
+            -- create a chart of the area (has no return-value)
+            player.force.chart(train_stop.surface, area)
 
-        if previous_backer_name == train_stop.backer_name then
-            -- update train amount
-            station_amount = station_amount + 1
-            station_amount_label.caption = {"station-amount", station_amount}
-        else
-            ---- Generate new card
-            previous_backer_name = train_stop.backer_name
-            station_amount = 1
-            -- general design
-            local card = tableView.add{ type = "frame"}
-            card.style.height = stop_height
-            card.style.width = stop_width
-            card.style.top_padding = 0
-            card.style.right_padding = 4
-            card.style.bottom_padding = 0
-            card.style.left_padding = 4
-            card.visible = filter_station(player_index, train_stop.backer_name)
+            if previous_backer_name == train_stop.backer_name then
+                -- update train amount
+                station_amount = station_amount + 1
+                station_amount_label.caption = {"station-amount", station_amount}
+            else
+                ---- Generate new card
+                previous_backer_name = train_stop.backer_name
+                station_amount = 1
+                -- general design
+                local card = tableView.add{ type = "frame"}
+                card.style.height = stop_height
+                card.style.width = stop_width
+                card.style.top_padding = 0
+                card.style.right_padding = 4
+                card.style.bottom_padding = 0
+                card.style.left_padding = 4
+                card.visible = filter_station(player_index, train_stop.backer_name)
 
-            -- add card to list
-            if not cards[player_index] then
-                cards[player_index] = {}
+                -- add card to list
+                if not cards[player_index] then
+                    cards[player_index] = {}
+                end
+                cards[player_index][card.index] = {}
+                cards[player_index][card.index] = { train_stop_name = train_stop.backer_name, card = card}
+
+                -- item flow to control spacing
+                local card_flow = card.add{ type = "flow", direction = "vertical"}
+                card_flow.style.vertical_spacing = 0
+
+                -- Station name
+                local name_label = card_flow.add{ type = "label", caption = train_stop.backer_name}
+                name_label.style.horizontally_stretchable = true
+                name_label.style.font_color = { 255, 255, 255} --white
+                name_label.style.font  = "default-dialog-button"
+                name_label.style.horizontally_stretchable = true
+                name_label.style.maximal_width = stop_width
+                name_label.style.margin = 0
+                name_label.style.padding = 0
+                name_label.style.height = name_label_height
+
+                -- amount of stations with this name
+                station_amount_label = card_flow.add{ type = "label"}
+                station_amount_label.caption = {"station-amount", station_amount}
+                station_amount_label.style.margin = 0
+                station_amount_label.style.padding = 0
+
+                -- amount of trains, that stop at this station
+                local train_amount_label = card_flow.add{type = "label"}
+                train_amount_label.caption = {"train-amount", #train_stop.get_train_stop_trains()}
+                train_amount_label.style.bottom_margin = 5
+
+                local bottom_flow = card_flow.add{type = "flow", direction = "horizontal"}
+
+                -- scroll-pane, when more than 5 stations with this name exist
+                local bottom_scroll_pane = bottom_flow.add{type = "scroll-pane"}
+                bottom_scroll_pane.style.width = list_width + 20 -- size of scrollbar
+                bottom_scroll_pane.style.bottom_margin = 5
+                bottom_scroll_pane.style.maximal_height = preview_size
+                bottom_scroll_pane.style.extra_padding_when_activated = 0
+
+                -- add flow control to the scroll-pane
+                bottom_scroll = bottom_scroll_pane.add{type = "flow", direction = "vertical"}
+                bottom_scroll.style.vertical_spacing = 0
+                bottom_scroll.style.width = list_width
+
+                -- add mini-map
+                local map = bottom_flow.add{
+                    type = "minimap",
+                    position = position,
+                    surface_index = train_stop.surface.index
+                }
+                map.style.height = preview_size
+                map.style.width = preview_size
+                map.style.horizontally_stretchable = true
+                map.style.vertically_stretchable = true
             end
-            cards[player_index][card.index] = {}
-            cards[player_index][card.index] = { train_stop_name = train_stop.backer_name, card = card}
 
-            -- item flow to control spacing
-            local card_flow = card.add{ type = "flow", direction = "vertical"}
-            card_flow.style.vertical_spacing = 0
+            -- add container to the scroll-pane
+            local station_container = bottom_scroll.add{ type = "flow", direction = "horizontal"}
 
-            -- Station name
-            local name_label = card_flow.add{ type = "label", caption = train_stop.backer_name}
-            name_label.style.horizontally_stretchable = true
-            name_label.style.font_color = { 255, 255, 255} --white
-            name_label.style.font  = "default-dialog-button"
-            name_label.style.horizontally_stretchable = true
-            name_label.style.maximal_width = stop_width
-            name_label.style.margin = 0
-            name_label.style.padding = 0
-            name_label.style.height = name_label_height
+            -- add button that opens the station directly
+            local station_button = station_container.add{ type = "button", direction = "horizontal"}
+            station_button.style.width = 80
+            station_button.tooltip = {"station-button-tooltip"}
 
-            -- amount of stations with this name
-            station_amount_label = card_flow.add{ type = "label"}
-            station_amount_label.caption = {"station-amount", station_amount}
-            station_amount_label.style.margin = 0
-            station_amount_label.style.padding = 0
+            -- add station name on top of the button
+            local station_button_label = station_button.add{ type = "label"}
+            station_button_label.caption = {"station-name", station_amount}
+            station_button_label.style.font_color = {} --black
+            station_button_label.ignored_by_interaction = true
 
-            -- amount of trains, that stop at this station
-            local train_amount_label = card_flow.add{type = "label"}
-            train_amount_label.caption = {"train-amount", #train_stop.get_train_stop_trains()}
-            train_amount_label.style.bottom_margin = 5
+            -- add button that opens the map with the station centered
+            local station_map_button = station_container.add{ type = "sprite-button"}
+            station_map_button.sprite = "train-station-overview-map-sprite"
+            station_map_button.style.width = 28
+            station_map_button.style.height = 28
+            station_map_button.style.padding = 0
+            station_map_button.tooltip = {"open-on-map-tooltip"}
 
-            local bottom_flow = card_flow.add{type = "flow", direction = "horizontal"}
+            -- add station button to the global array
+            if not buttons[player_index] then
+                buttons[player_index] = {}
+            end
+            buttons[player_index][station_button.index] = train_stop
 
-            -- scroll-pane, when more than 5 stations with this name exist
-            local bottom_scroll_pane = bottom_flow.add{type = "scroll-pane"}
-            bottom_scroll_pane.style.width = list_width + 20 -- size of scrollbar
-            bottom_scroll_pane.style.bottom_margin = 5
-            bottom_scroll_pane.style.maximal_height = preview_size
-            bottom_scroll_pane.style.extra_padding_when_activated = 0
-
-            -- add flow control to the scroll-pane
-            bottom_scroll = bottom_scroll_pane.add{type = "flow", direction = "vertical"}
-            bottom_scroll.style.vertical_spacing = 0
-            bottom_scroll.style.width = list_width
-
-            -- add mini-map
-            local map = bottom_flow.add{
-                type = "minimap",
-                position = position,
-                surface_index = train_stop.surface.index
-            }
-            map.style.height = preview_size
-            map.style.width = preview_size
-            map.style.horizontally_stretchable = true
-            map.style.vertically_stretchable = true
+            -- add map button to the global array
+            if not map_buttons[player_index] then
+                map_buttons[player_index] = {}
+            end
+            map_buttons[player_index][station_map_button.index] = train_stop
         end
-
-        -- add container to the scroll-pane
-        local station_container = bottom_scroll.add{ type = "flow", direction = "horizontal"}
-
-        -- add button that opens the station directly
-        local station_button = station_container.add{ type = "button", direction = "horizontal"}
-        station_button.style.width = 80
-        station_button.tooltip = {"station-button-tooltip"}
-
-        -- add station name on top of the button
-        local station_button_label = station_button.add{ type = "label"}
-        station_button_label.caption = {"station-name", station_amount}
-        station_button_label.style.font_color = {} --black
-        station_button_label.ignored_by_interaction = true
-
-        -- add button that opens the map with the station centered
-        local station_map_button = station_container.add{ type = "sprite-button"}
-        station_map_button.sprite = "train-station-overview-map-sprite"
-        station_map_button.style.width = 28
-        station_map_button.style.height = 28
-        station_map_button.style.padding = 0
-        station_map_button.tooltip = {"open-on-map-tooltip"}
-
-        -- add station button to the global array
-        if not buttons[player_index] then
-            buttons[player_index] = {}
-        end
-        buttons[player_index][station_button.index] = train_stop
-
-        -- add map button to the global array
-        if not map_buttons[player_index] then
-            map_buttons[player_index] = {}
-        end
-        map_buttons[player_index][station_map_button.index] = train_stop
     end
 end
 
@@ -256,7 +281,7 @@ end
 function insert_sorted(entity)
     local inserted = false
     for index, train_stop in pairs(global.train_stops) do
-        if entity.backer_name:lower() < train_stop.backer_name:lower() then
+        if check_station(train_stop) and entity.backer_name:lower() < train_stop.backer_name:lower() then
             table.insert(global.train_stops, index, entity)
             return
         end
@@ -291,13 +316,7 @@ script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_e
 script.on_event({defines.events.on_entity_died, defines.events.on_player_mined_entity, defines.events.on_robot_mined_entity},
     function(e)
         if e.entity.prototype.type == "train-stop" then
-            local pos = find_train_stop(e.entity)
-            if pos == 0 then
-                print("train_stop not found, just do nothing!")
-                return
-            end
-
-            table.remove(global.train_stops, pos)
+            remove_station(e.entity)
 
             refresh_all_guis()
         end
