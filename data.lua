@@ -8,5 +8,12 @@ data:extend{
         priority = "extra-high",
         width = 32,
         height = 32
+    },
+    {
+        type = "sprite",
+        name = "train-station-overview-refresh-sprite",
+        filename = "__core__/graphics/icons/refresh.png",
+        width = 32,
+        height = 32
     }
 }

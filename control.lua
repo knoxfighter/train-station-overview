@@ -16,6 +16,8 @@ local search_boxes = {}
 local search_text_fields = {}
 -- search_text[player.index] = text
 local search_text = {}
+-- reload_buttons[player.index] = reload_button
+local reload_buttons = {}
 
 function check_station(station)
     if station then
@@ -96,9 +98,12 @@ function create_gui(player_index)
 
     -- search
     local search_text_field = titleFlow.add{ type = "textfield", visible = search_text[player_index] ~= nil, text = search_text[player_index]}
-    local search_button = titleFlow.add{ type = "sprite-button", style = "tool_button", sprite = "utility/search_icon", tooltip = { "gui.search-with-focus", { "search"}}}
+    local search_button = titleFlow.add{ type = "sprite-button", style = "tool_button", sprite = "utility/search_icon", tooltip = { "gui.search"}}
     search_boxes[search_button.index] = search_text_field
     search_text_fields[search_text_field.index] = search_text_field
+
+    local reload_button = titleFlow.add{type = "sprite-button", style = "tool_button", sprite = "train-station-overview-refresh-sprite", tooltip = {"refresh-stations"}}
+    reload_buttons[player.index] = reload_button
 
     if #global.train_stops < 1 then
         frame.add{type = "label", caption = {"no-train-stops"}}
@@ -383,6 +388,12 @@ script.on_event(defines.events.on_gui_click,
                 player.open_map(train_stop.position, 0.4)
                 close_gui_clear(e.player_index)
             end
+        end
+
+        -- reload train stops
+        if reload_buttons[player.index] and reload_buttons[player.index].valid and reload_buttons[player.index].index == e.element.index then
+            on_load()
+            refresh_all_guis()
         end
     end
 )

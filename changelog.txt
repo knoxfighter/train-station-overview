@@ -3,6 +3,7 @@ Date: xx.xx.2019
   Features:
     - added support for all modded train station (prototype type "train-stop")
     - added sanity-checks, so crashes not occur anymore
+    - added refresh button, that rescans the stations
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.0
 Date: 16.06.2019
