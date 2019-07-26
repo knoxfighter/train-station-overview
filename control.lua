@@ -93,10 +93,13 @@ function create_gui(player_index)
     local titleFlow = frame.add{type = "flow", direction = "horizontal"}
     titleFlow.drag_target = frame
     local title = titleFlow.add{type = "label", style = "heading_1_label", caption = {"train-stops"}}
+    title.ignored_by_interaction = true
     local amount_label = titleFlow.add{type = "label", caption = {"station-amount", #global.train_stops}}
     amount_label.style.top_padding = 3
-    local fillerFlow = titleFlow.add{type = "flow", direction = "horizontal"}
+    amount_label.ignored_by_interaction = true
+    local fillerFlow = titleFlow.add{type = "frame", direction = "horizontal", style = "train-station-overview-filler-style"}
     fillerFlow.style.horizontally_stretchable = true
+    fillerFlow.ignored_by_interaction = true
 
     -- search
     local search_text_field = titleFlow.add{ type = "textfield", visible = search_text[player_index] ~= nil, text = search_text[player_index]}

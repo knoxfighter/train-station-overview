@@ -17,3 +17,13 @@ data:extend{
         height = 32
     }
 }
+
+data.raw["gui-style"]["default"]["train-station-overview-filler-style"] = {
+    type = "frame_style",
+    height = 32,
+    graphical_set = data.raw["gui-style"]["default"]["draggable_space"].graphical_set,
+    use_header_filler = false,
+    horizontally_stretchable = "on",
+    left_margin = data.raw["gui-style"]["default"]["draggable_space"].left_margin,
+    right_margin = data.raw["gui-style"]["default"]["draggable_space"].right_margin,
+}
