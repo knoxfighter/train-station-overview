@@ -5,6 +5,6 @@
   "author": "knoxfighter",
   "contact": "factorio@asdff45.de",
   "factorio_version": "0.17",
-  "dependencies": ["base >= 0.17.46"],
+  "dependencies": ["base >= 0.17.59"],
   "description": "Add a list of all train stations"
 }
