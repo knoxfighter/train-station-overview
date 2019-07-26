@@ -341,7 +341,7 @@ end
 
 script.on_event("open-train-stop-overview",
     function(e)
-        if gui_is_opened() then
+        if gui_is_opened(e.player_index) then
             close_gui_clear(e.player_index)
         else
             create_gui(e.player_index)
