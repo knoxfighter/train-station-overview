@@ -1,5 +1,14 @@
-Version: 1.2.0
+Version: 1.3.0
 Date: xx.xx.2019
+Factorio-Version: >= 0.17.59
+  Features:
+    - use new gui.screen
+    - Screen is movable
+  Bugfix:
+    - Pressing the Open Shortcut again, will close the gui it again
+---------------------------------------------------------------------------------------------------
+Version: 1.2.0
+Date: 14.07.2019
   Features:
     - added support for all modded train station (prototype type "train-stop")
     - added sanity-checks, so crashes not occur anymore
