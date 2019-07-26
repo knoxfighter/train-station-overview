@@ -76,7 +76,8 @@ function create_gui(player_index)
     local player = game.get_player(player_index)
 
     -- create basic gui frame
-    local frame = player.gui.center.add{type = "frame", direction = "vertical"}
+    local frame = player.gui.screen.add{type = "frame", direction = "vertical", auto_center = true}
+    frame.auto_center = true
     local max_height = player.display_resolution.height * 0.8 / player.display_scale
 
     if max_height > player.display_resolution.height / player.display_scale then
@@ -90,6 +91,7 @@ function create_gui(player_index)
 
     -- header
     local titleFlow = frame.add{type = "flow", direction = "horizontal"}
+    titleFlow.drag_target = frame
     local title = titleFlow.add{type = "label", style = "heading_1_label", caption = {"train-stops"}}
     local amount_label = titleFlow.add{type = "label", caption = {"station-amount", #global.train_stops}}
     amount_label.style.top_padding = 3
