@@ -58,6 +58,9 @@ function filter_station(player_index, train_stop_name)
 end
 
 function create_gui(player_index)
+    -- get player
+    local player = game.get_player(player_index)
+
     -- define constants
     local preview_size = 160
     local preview_size_half = preview_size / 2
@@ -72,8 +75,10 @@ function create_gui(player_index)
     local station_amount = 0
     local bottom_scroll
 
-    -- get player
-    local player = game.get_player(player_index)
+    local max_columns = ((player.display_resolution.width / player.display_scale) / (stop_width + 50))
+    if max_columns < 1 then
+        max_columns = 1
+    end
 
     -- create basic gui frame
     local frame = player.gui.screen.add{type = "frame", direction = "vertical", auto_center = true}
@@ -97,9 +102,14 @@ function create_gui(player_index)
     local amount_label = titleFlow.add{type = "label", caption = {"station-amount", #global.train_stops}}
     amount_label.style.top_padding = 5
     amount_label.ignored_by_interaction = true
-    local fillerFlow = titleFlow.add{type = "frame", direction = "horizontal", style = "train-station-overview-filler-style"}
+    local fillerFlow = titleFlow.add{type = "empty-widget", style = "draggable_space_header"}
     fillerFlow.style.horizontally_stretchable = true
+    fillerFlow.style.height = 24
+    fillerFlow.style.top_margin = 3
     fillerFlow.ignored_by_interaction = true
+
+    --local size_slider = titleFlow.add{type = "slider", minimum_value = 1, maximum_value = max_columns, value = max_columns, value_step = 1, discrete_slider = true, discrete_values = true}
+    --size_slider.style.top_margin = 8
 
     -- search
     local search_text_field = titleFlow.add{ type = "textfield", visible = search_text[player_index] ~= nil, text = search_text[player_index]}
@@ -113,11 +123,6 @@ function create_gui(player_index)
     if #global.train_stops < 1 then
         frame.add{type = "label", caption = {"no-train-stops"}}
         return
-    end
-
-    local max_columns = ((player.display_resolution.width / player.display_scale) / (stop_width + 50))
-    if max_columns < 1 then
-        max_columns = 1
     end
 
     -- Inner Frame with scrollbar and tableview
@@ -439,6 +444,12 @@ script.on_event(defines.events.on_entity_renamed,
         end
     end
 )
+
+--script.on_event(defines.events.on_gui_value_changed,
+--    function(e)
+--        print("value changed, new value: " .. e.element.slider_value)
+--    end
+--)
 
 function on_load()
     if global.train_stops then
