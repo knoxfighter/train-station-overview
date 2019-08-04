@@ -115,7 +115,7 @@ function create_gui(player_index)
         return
     end
 
-    local max_columns = (player.display_resolution.width / (stop_width + 50))
+    local max_columns = ((player.display_resolution.width / player.display_scale) / (stop_width + 50))
     if max_columns < 1 then
         max_columns = 1
     end
