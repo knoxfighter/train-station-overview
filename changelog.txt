@@ -5,7 +5,7 @@ Factorio-Version: >= 0.17.59
     - use new gui.screen
     - Screen is movable
   Bugfix:
-    - Pressing the Open Shortcut again, will close the gui it again
+    - Pressing the Open Shortcut again, will close the gui again
 ---------------------------------------------------------------------------------------------------
 Version: 1.2.0
 Date: 14.07.2019
