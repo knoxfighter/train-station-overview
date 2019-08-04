@@ -95,7 +95,7 @@ function create_gui(player_index)
     local title = titleFlow.add{type = "label", style = "heading_1_label", caption = {"train-stops"}}
     title.ignored_by_interaction = true
     local amount_label = titleFlow.add{type = "label", caption = {"station-amount", #global.train_stops}}
-    amount_label.style.top_padding = 3
+    amount_label.style.top_padding = 5
     amount_label.ignored_by_interaction = true
     local fillerFlow = titleFlow.add{type = "frame", direction = "horizontal", style = "train-station-overview-filler-style"}
     fillerFlow.style.horizontally_stretchable = true
