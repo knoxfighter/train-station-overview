@@ -97,15 +97,14 @@ function create_gui(player_index)
     -- header
     local titleFlow = frame.add{type = "flow", direction = "horizontal"}
     titleFlow.drag_target = frame
+    titleFlow.style.vertical_align = "center"
     local title = titleFlow.add{type = "label", style = "heading_1_label", caption = {"train-stops"}}
     title.ignored_by_interaction = true
     local amount_label = titleFlow.add{type = "label", caption = {"station-amount", #global.train_stops}}
-    amount_label.style.top_padding = 5
     amount_label.ignored_by_interaction = true
     local fillerFlow = titleFlow.add{type = "empty-widget", style = "draggable_space_header"}
     fillerFlow.style.horizontally_stretchable = true
     fillerFlow.style.height = 24
-    fillerFlow.style.top_margin = 3
     fillerFlow.ignored_by_interaction = true
 
     --local size_slider = titleFlow.add{type = "slider", minimum_value = 1, maximum_value = max_columns, value = max_columns, value_step = 1, discrete_slider = true, discrete_values = true}
