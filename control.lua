@@ -315,7 +315,12 @@ function gui_is_opened(player_index)
     end
 end
 
-script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_entity},
+script.on_event({
+    defines.events.on_built_entity,
+    defines.events.on_robot_built_entity,
+    defines.events.script_raised_built,
+    defines.events.script_raised_revive
+},
     function(e)
         if type(global.train_stops) ~= "table" then
             global.train_stops = {}
@@ -329,7 +334,12 @@ script.on_event({defines.events.on_built_entity, defines.events.on_robot_built_e
     end
 )
 
-script.on_event({defines.events.on_entity_died, defines.events.on_player_mined_entity, defines.events.on_robot_mined_entity},
+script.on_event({
+    defines.events.on_entity_died,
+    defines.events.on_player_mined_entity,
+    defines.events.on_robot_mined_entity,
+    defines.events.script_raised_destroy
+},
     function(e)
         if e.entity.prototype.type == "train-stop" then
             remove_station(e.entity)
