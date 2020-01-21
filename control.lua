@@ -161,10 +161,7 @@ function create_gui(player_index)
                 local card = tableView.add{ type = "frame"}
                 card.style.height = stop_height
                 card.style.width = stop_width
-                card.style.top_padding = 0
-                card.style.right_padding = 4
-                card.style.bottom_padding = 0
-                card.style.left_padding = 4
+                card.style.padding = {0, 4}
                 card.visible = filter_station(player_index, train_stop.backer_name)
 
                 -- add card to list
