@@ -1,3 +1,8 @@
+Version: 2.0.1
+Date: 23.01.2020
+  Bugfix:
+    - Fixed crash when calling script_raised_built or script_raised_revive
+---------------------------------------------------------------------------------------------------
 Version: 2.0.0
 Date: 21.01.2020
   Breaking changes:

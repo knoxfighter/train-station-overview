@@ -319,12 +319,21 @@ script.on_event({
     defines.events.script_raised_revive
 },
     function(e)
+        ---@type LuaEntity
+        local entity
+
+        if e.entity then
+            entity = e.entity
+        else
+            entity = e.created_entity
+        end
+
         if type(global.train_stops) ~= "table" then
             global.train_stops = {}
         end
 
-        if e.created_entity.prototype.type == "train-stop" then
-            insert_sorted(e.created_entity)
+        if entity.prototype.type == "train-stop" then
+            insert_sorted(entity)
 
             refresh_all_guis()
         end
