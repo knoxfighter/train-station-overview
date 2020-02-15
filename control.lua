@@ -3,6 +3,7 @@
 local util = require("util")
 
 -- frames[player.index] = frame
+---@type table<number, LuaGuiElement>
 local frames = {}
 -- cards[player.index][card.index] = { card = card, train_stop_name = train_stop.backer_name }
 local cards = {}
@@ -435,6 +436,8 @@ script.on_event(defines.events.on_gui_text_changed,
                         card_data.card.visible = filter_station(e.player_index, card_data.train_stop_name)
                     end
                 end
+
+                frames[e.player_index].force_auto_center()
             end
         end
     end
