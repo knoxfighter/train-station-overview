@@ -1,6 +1,11 @@
 Version: 2.0.1
 Date: 23.01.2020
   Bugfix:
+    - Fixed crash, when searching regex characters (e.g. "["). Regex search disabled!
+---------------------------------------------------------------------------------------------------
+Version: 2.0.1
+Date: 23.01.2020
+  Bugfix:
     - Fixed crash when calling script_raised_built or script_raised_revive
 ---------------------------------------------------------------------------------------------------
 Version: 2.0.0

@@ -49,7 +49,7 @@ function filter_station(player_index, train_stop_name)
         local backer_name = train_stop_name:lower()
 
         for _, search_key in pairs(search_keys) do
-            if not backer_name:find(search_key:lower()) then
+            if not backer_name:find(search_key:lower(), 1, true) then
                 return false
             end
         end
