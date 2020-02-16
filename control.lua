@@ -49,7 +49,7 @@ function filter_station(player_index, train_stop_name)
         local backer_name = train_stop_name:lower()
 
         for _, search_key in pairs(search_keys) do
-            if not backer_name:find(search_key:lower()) then
+            if not backer_name:find(search_key:lower(), 1, true) then
                 return false
             end
         end
@@ -419,6 +419,8 @@ script.on_event(defines.events.on_gui_text_changed,
                         card_data.card.visible = filter_station(e.player_index, card_data.train_stop_name)
                     end
                 end
+
+                frames[e.player_index].force_auto_center()
             end
         end
     end
