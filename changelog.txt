@@ -4,6 +4,12 @@ Date: 16.02.2020
     - Fixed crash, when searching regex characters (e.g. "["). Regex search disabled!
     - Force auto_center, when searched, so it is centered all the time.
 ---------------------------------------------------------------------------------------------------
+Version: 1.3.1
+Date: 16.02.2020
+  Bugfix:
+    - Fixed crash, when searching regex characters (e.g. "["). Regex search disabled!
+    - Force auto_center, when searched, so it is centered all the time.
+---------------------------------------------------------------------------------------------------
 Version: 2.0.1
 Date: 23.01.2020
   Bugfix:
