@@ -1,3 +1,8 @@
+Version: 2.0.3
+Date: 05.04.2020
+  Bugfix:
+    - Fixed crash, since `LuaStyle::extra_padding_when_activated` got removed in 0.18.13
+---------------------------------------------------------------------------------------------------
 Version: 2.0.2
 Date: 16.02.2020
   Bugfix:
