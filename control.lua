@@ -361,6 +361,12 @@ script.on_event({
     end
 )
 
+script.on_event({
+    defines.events.on_train_schedule_changed
+},
+    refresh_all_guis
+)
+
 function find_train_stop(entity)
     for key, value in pairs(global.train_stops) do
         if value == entity then
