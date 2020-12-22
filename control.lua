@@ -256,7 +256,7 @@ function create_gui(player_index)
             else
                 color = {255, 255, 255} --white
             end
-            if limit == 4294967295 then limit = "None" end
+            if limit == 4294967295 then limit = {"description.no-limit"} end
             station_button_label.caption = {"station-name", station_amount, count, limit}
             station_button_label.style.font_color = color
             station_button_label.ignored_by_interaction = true
