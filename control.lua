@@ -19,6 +19,8 @@ local search_text_fields = {}
 local search_text = {}
 -- reload_buttons[player.index] = reload_button
 local reload_buttons = {}
+-- close_buttons[player.index] = close_button
+local close_buttons = {}
 
 function check_station(station)
     if station then
@@ -119,6 +121,10 @@ function create_gui(player_index)
 
     local reload_button = titleFlow.add{type = "sprite-button", style = "tool_button", sprite = "train-station-overview-refresh-sprite", tooltip = {"refresh-stations"}}
     reload_buttons[player.index] = reload_button
+    
+    local close_button = titleFlow.add{type = "sprite-button", style = "tool_button", sprite = "utility/close_black", tooltip = {"gui.close"}}
+    close_buttons[player.index] = close_button
+    
 
     if #global.train_stops < 1 then
         frame.add{type = "label", caption = {"no-train-stops"}}
@@ -431,6 +437,11 @@ script.on_event(defines.events.on_gui_click,
         if reload_buttons[player.index] and reload_buttons[player.index].valid and reload_buttons[player.index].index == e.element.index then
             on_load()
             refresh_all_guis()
+        end
+
+        -- close gui
+        if close_buttons[player.index] and close_buttons[player.index].valid and close_buttons[player.index].index == e.element.index then
+            close_gui(player.index)
         end
     end
 )
