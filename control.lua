@@ -19,6 +19,8 @@ local search_text_fields = {}
 local search_text = {}
 -- reload_buttons[player.index] = reload_button
 local reload_buttons = {}
+-- close_buttons[player.index] = close_button
+local close_buttons = {}
 
 function check_station(station)
     if station then
@@ -119,6 +121,10 @@ function create_gui(player_index)
 
     local reload_button = titleFlow.add{type = "sprite-button", style = "tool_button", sprite = "train-station-overview-refresh-sprite", tooltip = {"refresh-stations"}}
     reload_buttons[player.index] = reload_button
+    
+    local close_button = titleFlow.add{type = "sprite-button", style = "tool_button", sprite = "utility/close_black", tooltip = {"gui.close"}}
+    close_buttons[player.index] = close_button
+    
 
     if #global.train_stops < 1 then
         frame.add{type = "label", caption = {"no-train-stops"}}
@@ -239,8 +245,20 @@ function create_gui(player_index)
 
             -- add station name on top of the button
             local station_button_label = station_button.add{ type = "label"}
-            station_button_label.caption = {"station-name", station_amount}
-            station_button_label.style.font_color = {} --black
+            local count = train_stop.trains_count
+            local limit = train_stop.trains_limit
+            local color = {}
+            local control = train_stop.get_control_behavior()
+            if count >= limit then
+                color = { 0, 0, 255} --blue 
+            elseif control and control.disabled then
+                color = { 255, 0, 0} --red
+            else
+                color = {255, 255, 255} --white
+            end
+            if limit == 4294967295 then limit = {"description.no-limit"} end
+            station_button_label.caption = {"station-name", station_amount, count, limit}
+            station_button_label.style.font_color = color
             station_button_label.ignored_by_interaction = true
 
             -- add button that opens the map with the station centered
@@ -361,6 +379,12 @@ script.on_event({
     end
 )
 
+script.on_event({
+    defines.events.on_train_schedule_changed
+},
+    refresh_all_guis
+)
+
 function find_train_stop(entity)
     for key, value in pairs(global.train_stops) do
         if value == entity then
@@ -425,6 +449,11 @@ script.on_event(defines.events.on_gui_click,
         if reload_buttons[player.index] and reload_buttons[player.index].valid and reload_buttons[player.index].index == e.element.index then
             on_load()
             refresh_all_guis()
+        end
+
+        -- close gui
+        if close_buttons[player.index] and close_buttons[player.index].valid and close_buttons[player.index].index == e.element.index then
+            close_gui(player.index)
         end
     end
 )
